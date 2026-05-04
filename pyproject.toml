@@ -44,7 +44,7 @@ Issues = "https://github.com/Terradue/asyncapi-mate/issues"
 Source = "https://github.com/Terradue/asyncapi-mate"
 
 [project.scripts]
-asyncapi_mate = "asyncapi_mate.cli:main"
+asyncapi-mate = "asyncapi_mate.cli:main"
 
 [tool.hatch.version]
 path = "src/asyncapi_mate/__about__.py"
