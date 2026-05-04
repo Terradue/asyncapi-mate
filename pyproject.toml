@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling==1.29.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "asyncapi_mate"
+dynamic = ["version"]
+description = "EDA Markdown template tooling for AsyncAPI documents"
+
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+keywords = ["asyncapi", "markdown", "EDA", "template"]
+authors = [
+  { name = "Fabrice Brito", email = "info@terradue.com" },
+  { name = "Simone Tripodi", email = "info@terradue.com"}
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "click==8.3.2",
+  "Jinja2==3.1.6",
+  "loguru==0.7.3",
+  "PyYAML==6.0.3",
+  "jsonref==1.1.0",
+  "httpx==0.28.1"
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.urls]
+Documentation = "https://github.com/Terradue/asyncapi-mate#readme"
+Issues = "https://github.com/Terradue/asyncapi-mate/issues"
+Source = "https://github.com/Terradue/asyncapi-mate"
+
+[project.scripts]
+asyncapi_mate = "asyncapi_mate.cli:main"
+
+[tool.hatch.version]
+path = "src/asyncapi_mate/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/asyncapi_mate"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/LICENSE",
+  "/README.md",
+  "/pyproject.toml",
+  "/src/asyncapi_mate",
+]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy==1.19.1",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/asyncapi_mate tests}"
+
+[tool.coverage.run]
+source_pkgs = ["asyncapi_mate", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/asyncapi_mate/__about__.py",
+]
+
+[tool.coverage.paths]
+asyncapi_mate = ["src/asyncapi_mate", "*/asyncapi_mate/src/asyncapi_mate"]
+tests = ["tests", "*/asyncapi_mate/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.hatch.envs.test]
+description = "Test environment"
+skip-install = false
+dependencies = ["pytest==9.0.2", "pytest-cov==7.0.0"]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest"
+test-q = "pytest -q"
+test-cov = "pytest --cov=asyncapi_mate"
+test-show-setup = "pytest --setup-show"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+[tool.hatch.envs.dev]
+description = "Development environment"
+dependencies = [
+  "pytest==9.0.2",
+  "ruff==0.15.6",
+]
+
+[tool.hatch.envs.dev.scripts]
+lint = "ruff format src tests"
+check = "ruff check --fix src tests"

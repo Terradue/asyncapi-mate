@@ -1,0 +1,13 @@
+@startuml
+!theme _none_
+
+component "{{application_name}}" as {{application_name | to_puml_name}}
+
+{% for operation in application.operations %}queue "{{operation.channel.address}}" as {{operation.channel.address | to_puml_name}} {
+{% for example in operation.channel.messages.defaultMessage.examples %}  json {{example.name}} {{ example.payload | tojson(indent=4) }}
+{% endfor %}
+}
+
+{{application_name | to_puml_name}} -{% if "send" == operation.action %}D{% else %}U{% endif %}-> {{operation.channel.address | to_puml_name}} : [[../../../../../c4/components/EDA/asyncapi_events.html#{{operation | get_operation_anchor_link}} {{operation.action}} {{operation.channel.messages.defaultMessage.name}}]]
+{% endfor %}
+@enduml

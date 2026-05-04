@@ -1,0 +1,14 @@
+.cache
+.hatch
+.codex
+.project
+.task
+.venv
+uv.lock
+docs/diagrams/out
+site
+__transpiled
+node_modules
+*.tgz
+__pycache__
+schemas/asyncapi.json

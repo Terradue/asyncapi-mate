@@ -1,0 +1,39 @@
+@startuml
+hide empty members
+skinparam classAttributeIconSize 0
+
+{% for cls in model["classes"] %}
+class {{ cls["name"] }} {
+{% for attr in cls["attributes"] %}
+  {{ '+' if attr["required"] else '#' }}{{ attr["name"] }}: {{ attr["type"] }}{% if attr["const"] is not none %} = {{ attr["const"] | tojson }}{% endif %}
+{% endfor %}
+{% if cls["attributes"] and cls["additional_properties"] %}
+  --
+{% endif %}
+{% for attr in cls["additional_properties"] %}
+  {{ '+' if attr["required"] else '#' }}{{ attr["name"] }}: {{ attr["type"] }}
+{% endfor %}
+}
+{% endfor %}
+
+{% for enum in model["enums"] %}
+enum {{ enum["name"] }} {
+{% for value in enum["values"] %}
+  {{ value }}
+{% endfor %}
+}
+{% endfor %}
+
+{% for parent, child in model["inheritances"] %}
+{{ parent }} <|-- {{ child }}
+{% endfor %}
+
+{% for link in model["links"] %}
+{% if link["mult_src"] or link["mult_dst"] %}
+{{ link["src"] }} "{{ link["mult_src"] or '' }}" --> "{{ link["mult_dst"] or '' }}" {{ link["dst"] }} : {{ link["label"] }}
+{% else %}
+{{ link["src"] }} --> {{ link["dst"] }} : {{ link["label"] }}
+{% endif %}
+{% endfor %}
+
+@enduml

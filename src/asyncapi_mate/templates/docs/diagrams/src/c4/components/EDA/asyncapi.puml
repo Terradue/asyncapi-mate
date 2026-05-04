@@ -1,0 +1,20 @@
+@startuml
+!theme _none_
+
+{% for application_name, application in asyncapi["x-applications"].items() %}component "{{application_name}}" as {{application_name | to_puml_name}}
+
+{% for operation in application.operations %}
+{% if "send" == operation.action %}queue "{{operation.channel.address}}" as {{operation.channel.address | to_puml_name}} {
+  {% for example in operation.channel.messages.defaultMessage.examples %}
+  json {{example.name}} {{ example.payload | tojson(indent=4) }}
+  {% endfor %}
+}
+
+{{application_name | to_puml_name}} -d-> {{operation.channel.address | to_puml_name}} : [[../../../../../c4/components/EDA/asyncapi_events.html#{{operation | get_operation_anchor_link}} {{operation.action}} {{operation.channel.messages.defaultMessage.name}}]]
+{% else %}
+{{application_name | to_puml_name}} -U-> {{operation.channel.address | to_puml_name}} : [[../../../../../c4/components/EDA/asyncapi_events.html#{{operation | get_operation_anchor_link}} {{operation.action}} {{operation.channel.messages.defaultMessage.name}}]]
+{% endif %}
+{% endfor %}
+
+{% endfor %}
+@enduml
