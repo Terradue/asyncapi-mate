@@ -53,7 +53,7 @@ def main(source: Path, output: Path):
         logger.warning(data)
 
         jinja_environment = Environment(
-            loader=PackageLoader(package_name="seda_markdown_template")
+            loader=PackageLoader(package_name="asyncapi_mate")
         )
 
         def _to_mapping(functions: List[Any]):
