@@ -14,7 +14,11 @@
 
 from . import get_operation_anchor_link, to_puml_name, load_aysncapi
 from .__about__ import __version__
-from .schema_to_plantuml import schema_to_plantuml_model
+from .schema_to_plantuml import (
+    plantuml_application_channel_definitions,
+    plantuml_operation_channel_definitions,
+    schema_to_plantuml_model,
+)
 from datetime import datetime
 from jinja2 import Environment, PackageLoader
 from loguru import logger
@@ -65,7 +69,14 @@ def main(source: Path, output: Path):
 
             jinja_environment.filters.update(mapping)
 
-        _to_mapping([to_puml_name, get_operation_anchor_link])
+        _to_mapping(
+            [
+                to_puml_name,
+                get_operation_anchor_link,
+                plantuml_operation_channel_definitions,
+                plantuml_application_channel_definitions,
+            ]
+        )
 
         for template_name in [
             "docs/c4/components/EDA/asyncapi.md",

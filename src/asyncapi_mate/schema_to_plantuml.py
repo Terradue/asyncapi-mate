@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from . import to_puml_name
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -70,6 +71,112 @@ class DiagramModel:
     enums: List[EnumDef] = field(default_factory=list)
     inheritances: List[Tuple[str, str]] = field(default_factory=list)  # (parent, child)
     links: List[LinkDef] = field(default_factory=list)
+
+
+@dataclass
+class ChannelExampleDef:
+    name: str
+    payload: Any
+
+
+@dataclass
+class ChannelDef:
+    address: str
+    examples: List[ChannelExampleDef] = field(default_factory=list)
+
+
+def _read_member(node: Any, key: str, default: Any = MISSING) -> Any:
+    if isinstance(node, Mapping):
+        return node.get(key, default)
+
+    try:
+        return node[key]
+    except (AttributeError, IndexError, KeyError, TypeError):
+        pass
+
+    return getattr(node, key, default)
+
+
+def _read_path(node: Any, *keys: str, default: Any = None) -> Any:
+    current = node
+
+    for key in keys:
+        current = _read_member(current, key)
+        if current is MISSING:
+            return default
+
+    return current
+
+
+def _iter_application_operations(applications: Any) -> Iterable[Any]:
+    application_values = (
+        applications.values() if isinstance(applications, Mapping) else applications
+    )
+
+    for application in application_values or []:
+        for operation in _read_member(application, "operations", []) or []:
+            yield operation
+
+
+def plantuml_operation_channel_definitions(
+    operations: Iterable[Any],
+    send_only: bool = False,
+) -> List[ChannelDef]:
+    channels_by_key: Dict[str, ChannelDef] = {}
+    seen_examples_by_channel: Dict[str, Set[str]] = {}
+
+    for operation in operations or []:
+        if send_only and _read_member(operation, "action") != "send":
+            continue
+
+        address = _read_path(operation, "channel", "address")
+        if address is None:
+            continue
+
+        channel_key = to_puml_name(str(address))
+        if channel_key not in channels_by_key:
+            channels_by_key[channel_key] = ChannelDef(address=str(address))
+            seen_examples_by_channel[channel_key] = set()
+
+        channel = channels_by_key[channel_key]
+        seen_examples = seen_examples_by_channel[channel_key]
+
+        examples = _read_path(
+            operation,
+            "channel",
+            "messages",
+            "defaultMessage",
+            "examples",
+            default=[],
+        )
+        for example in examples or []:
+            name = _read_member(example, "name", None)
+            if name is None:
+                continue
+
+            example_name = to_puml_name(str(name))
+            if example_name in seen_examples:
+                continue
+
+            seen_examples.add(example_name)
+            channel.examples.append(
+                ChannelExampleDef(
+                    name=example_name,
+                    payload=_read_member(example, "payload", {}),
+                )
+            )
+
+    return list(channels_by_key.values())
+
+
+def plantuml_application_channel_definitions(
+    applications: Any,
+    send_only: bool = True,
+) -> List[ChannelDef]:
+    return plantuml_operation_channel_definitions(
+        _iter_application_operations(applications),
+        send_only=send_only,
+    )
 
 
 class SchemaToPlantUMLModel:

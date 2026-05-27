@@ -2,7 +2,12 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from asyncapi_mate.schema_to_plantuml import schema_to_plantuml_model
+from asyncapi_mate import to_puml_name
+from asyncapi_mate.schema_to_plantuml import (
+    plantuml_application_channel_definitions,
+    plantuml_operation_channel_definitions,
+    schema_to_plantuml_model,
+)
 
 
 def _render_schema_diagram(model):
@@ -14,6 +19,164 @@ def _render_schema_diagram(model):
         "docs/diagrams/src/c4/components/EDA/schema_to_plantuml.puml"
     )
     return template.render(model=model)
+
+
+def _render_eda_diagram(template_name, **context):
+    templates_dir = (
+        Path(__file__).resolve().parents[1] / "src" / "asyncapi_mate" / "templates"
+    )
+    environment = Environment(loader=FileSystemLoader(templates_dir))
+    environment.filters.update(
+        {
+            "to_puml_name": to_puml_name,
+            "get_operation_anchor_link": lambda operation: "operation-anchor",
+            "plantuml_operation_channel_definitions": (
+                plantuml_operation_channel_definitions
+            ),
+            "plantuml_application_channel_definitions": (
+                plantuml_application_channel_definitions
+            ),
+        }
+    )
+    template = environment.get_template(template_name)
+    return template.render(**context)
+
+
+def _operation(action, address, message_name, examples):
+    return {
+        "action": action,
+        "channel": {
+            "address": address,
+            "messages": {
+                "defaultMessage": {
+                    "name": message_name,
+                    "examples": examples,
+                }
+            },
+        },
+    }
+
+
+def _example(name, payload):
+    return {"name": name, "payload": payload}
+
+
+def test_plantuml_application_channel_definitions_deduplicate_writer_topics():
+    applications = {
+        "writer-a": {
+            "operations": [
+                _operation(
+                    "send",
+                    "events/orders.created",
+                    "OrderCreated",
+                    [_example("CreatedSample", {"id": "1"})],
+                )
+            ]
+        },
+        "writer-b": {
+            "operations": [
+                _operation(
+                    "send",
+                    "events/orders.created",
+                    "OrderCreated",
+                    [
+                        _example("CreatedSample", {"id": "1"}),
+                        _example("EnrichedSample", {"id": "2"}),
+                    ],
+                )
+            ]
+        },
+        "reader": {
+            "operations": [
+                _operation(
+                    "receive",
+                    "events/orders.created",
+                    "OrderCreated",
+                    [_example("ReaderSample", {"id": "3"})],
+                )
+            ]
+        },
+    }
+
+    channels = plantuml_application_channel_definitions(applications)
+
+    assert len(channels) == 1
+    assert channels[0].address == "events/orders.created"
+    assert [example.name for example in channels[0].examples] == [
+        "CreatedSample",
+        "EnrichedSample",
+    ]
+
+
+def test_asyncapi_template_serializes_shared_writer_topic_once():
+    asyncapi = {
+        "x-applications": {
+            "writer-a": {
+                "operations": [
+                    _operation(
+                        "send",
+                        "events/orders.created",
+                        "OrderCreated",
+                        [_example("CreatedSample", {"id": "1"})],
+                    )
+                ]
+            },
+            "writer-b": {
+                "operations": [
+                    _operation(
+                        "send",
+                        "events/orders.created",
+                        "OrderCreated",
+                        [
+                            _example("CreatedSample", {"id": "1"}),
+                            _example("EnrichedSample", {"id": "2"}),
+                        ],
+                    )
+                ]
+            },
+        }
+    }
+
+    rendered = _render_eda_diagram(
+        "docs/diagrams/src/c4/components/EDA/asyncapi.puml",
+        asyncapi=asyncapi,
+    )
+
+    assert rendered.count('queue "events/orders.created" as events_orders_created') == 1
+    assert rendered.count("json CreatedSample") == 1
+    assert rendered.count("json EnrichedSample") == 1
+    assert "writer_a -d-> events_orders_created" in rendered
+    assert "writer_b -d-> events_orders_created" in rendered
+
+
+def test_application_template_serializes_repeated_operation_topic_once():
+    application = {
+        "operations": [
+            _operation(
+                "send",
+                "events/orders.created",
+                "OrderCreated",
+                [_example("CreatedSample", {"id": "1"})],
+            ),
+            _operation(
+                "receive",
+                "events/orders.created",
+                "OrderCreated",
+                [_example("CreatedSample", {"id": "1"})],
+            ),
+        ]
+    }
+
+    rendered = _render_eda_diagram(
+        "docs/diagrams/src/c4/components/EDA/application.puml",
+        application_name="worker",
+        application=application,
+    )
+
+    assert rendered.count('queue "events/orders.created" as events_orders_created') == 1
+    assert rendered.count("json CreatedSample") == 1
+    assert "worker -D-> events_orders_created" in rendered
+    assert "worker -U-> events_orders_created" in rendered
 
 
 def test_schema_to_plantuml_model_tracks_typed_additional_properties():
