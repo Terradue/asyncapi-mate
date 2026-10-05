@@ -29,7 +29,7 @@ on:
     # Only rebuild website when docs have changed
     - README.md
     - docs/**
-    - mkdocs.yaml
+    - mkdocs.yml
     - .github/**
 
 jobs:

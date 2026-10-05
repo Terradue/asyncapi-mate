@@ -1,44 +1,24 @@
 # AsyncAPI Mate
 
-AsyncAPI Mate turns an AsyncAPI YAML document into Markdown documentation for an event-driven pipeline. It reads the AsyncAPI definition, follows resolved references, and renders a documentation page that describes the API metadata, servers, applications, operations, topics, payload schemas, and examples.
+AsyncAPI Mate generates Markdown documentation and PlantUML source diagrams from an AsyncAPI document. Its `x-applications` extension connects applications to their operations, channels, messages, and payloads.
 
-The generated Markdown page is backed by PlantUML diagrams. Together, those diagrams show the full asynchronous pipeline, each application participating in it, and the payload structure for every generated message schema.
+The command produces an overview of the pipeline, a diagram for each application, and class diagrams for message payloads. Rendering the PlantUML sources into images is a separate step.
 
-## How It Models The Pipeline
+## Find what you need
 
-AsyncAPI Mate relies on the `x-applications` extension to describe the actors in the pipeline. Each entry under `x-applications` represents an application, service, producer, consumer, or other runtime component that participates in the AsyncAPI system.
+This documentation follows [Diátaxis](https://diataxis.fr/), separating learning, practical tasks, technical facts, and conceptual understanding.
 
-An application declares the operations it performs. Operations with the AsyncAPI action `send` are rendered as publishers: the application writes an event to a channel. Other operations are rendered as subscribers: the application reads an event from a channel.
+| Your goal | Start here |
+| --- | --- |
+| Learn by generating a small event pipeline | [Tutorial: your first pipeline](tutorials/first-pipeline.md) |
+| Connect applications to operations in your document | [How to describe applications](how-to/describe-applications.md) |
+| Refresh documentation after changing a schema | [How to regenerate documentation](how-to/regenerate.md) |
+| Put the generated page and diagrams into a documentation site | [How to integrate the output](how-to/integrate-output.md) |
+| Look up arguments, input expectations, or generated paths | [CLI](cli.md), [input](reference/input.md), and [output](reference/output.md) reference |
+| Understand the pipeline and payload views | [Explanation: how rendering works](explanation/rendering.md) |
 
-The operation links the actor to the AsyncAPI channel, the channel address, the default message, the payload schema, and the examples. This lets the generated documentation describe both the business-level pipeline and the concrete event contracts that flow through it.
+## Scope
 
-## What Gets Generated
+The CLI accepts a readable local YAML or JSON file and requires an output directory. The package requires Python 3.10 or later. It resolves references and renders bundled templates; it does not validate a document against the AsyncAPI specification, contact a message broker, or generate SVG images.
 
-For an input AsyncAPI document, the CLI renders these documentation artifacts into the selected output directory:
-
-- `docs/c4/components/EDA/asyncapi.md`: the main generated Markdown page for the AsyncAPI document.
-- `docs/diagrams/src/c4/components/EDA/asyncapi.puml`: a PlantUML overview of the whole pipeline, with applications connected to the queues they publish to or subscribe from.
-- `docs/diagrams/src/c4/components/EDA/<application>.puml`: one PlantUML diagram per `x-applications` entry, focused on that application and its operations.
-- `docs/diagrams/src/c4/components/EDA/<message>.puml`: one PlantUML class diagram per operation payload, named from the operation's default message.
-
-The generated Markdown page embeds the rendered diagram images and organizes the AsyncAPI content into sections for project metadata, license, servers, pipeline, applications, operations, payload schemas, and examples.
-
-## Diagram Content
-
-The pipeline diagrams render each `x-applications` entry as a PlantUML component. Channels are rendered as queues, and operation direction is derived from the AsyncAPI action:
-
-- `send` operations draw the application as publishing down to the queue.
-- Non-`send` operations draw the application as subscribing from the queue.
-
-The application-specific diagrams repeat the same relationship for a single actor and include JSON examples from the default message inside the queue representation.
-
-Payload diagrams are generated from each operation's default message payload schema. The schema converter produces a PlantUML class model with:
-
-- classes for object schemas and inline object properties;
-- attributes for schema properties, with required fields marked separately from optional fields;
-- enums for string enum values;
-- inheritance links for `$ref` entries inside `allOf`;
-- associations for `$ref`, object, array, enum, and `oneOf` relationships;
-- `List[...]`, `Union[...]`, and `Mapping[str, ...]` types for arrays, unions, and `additionalProperties`.
-
-This gives each generated operation page both the communication view of the pipeline and the structural view of the event payload that travels through it.
+The reference pages describe the current implementation, including its expected `defaultMessage` key, file overwrite behavior, and diagram-link limitations.

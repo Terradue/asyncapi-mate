@@ -19,7 +19,6 @@ repo_url: https://github.com/Terradue/asyncapi-mate/
 repo_name: Terradue/asyncapi-mate
 
 theme:
-  logo: imgs/icon-Terradue.png
   name: material
 
   palette:
@@ -49,7 +48,6 @@ markdown_extensions:
   - pymdownx.tilde
   - pymdownx.arithmatex:
       generic: true
-  - pymdownx.superfences
   - pymdownx.tabbed
   - pymdownx.superfences:
       custom_fences:
@@ -62,16 +60,20 @@ markdown_extensions:
   - pymdownx.highlight:
       line_spans: __span
 
-extra_css:
-  - styles/css/app.css
-
-extra_javascript:
-  - javascripts/config.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
 nav:
-  - 'index.md'
-  - 'cli.md'
+  - Home: index.md
+  - Tutorials:
+      - Your first pipeline: tutorials/first-pipeline.md
+  - How-to guides:
+      - Describe applications: how-to/describe-applications.md
+      - Regenerate documentation: how-to/regenerate.md
+      - Integrate the output: how-to/integrate-output.md
+  - Reference:
+      - CLI: cli.md
+      - Input document: reference/input.md
+      - Generated output: reference/output.md
+      - Payload diagrams: reference/schema-support.md
+  - Explanation:
+      - How rendering works: explanation/rendering.md
 
 copyright: <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%20License%202.0-blue"" alt="Apache License, Version 2.0" /></a>
