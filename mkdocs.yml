@@ -19,7 +19,7 @@ repo_url: https://github.com/Terradue/asyncapi-mate/
 repo_name: Terradue/asyncapi-mate
 
 theme:
-  name: material
+  name: readthedocs
 
   palette:
   - media: "(prefers-color-scheme: light)"
