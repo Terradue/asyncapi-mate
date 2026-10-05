@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://Terradue.github.io/asyncapi-mate/reference/input/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Input document - Terradue AsyncAPI Mate</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Input document";
+        var mkdocs_page_input_path = "reference/input.md";
+        var mkdocs_page_url = "/asyncapi-mate/reference/input/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Terradue AsyncAPI Mate
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-pipeline/">Your first pipeline</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/describe-applications/">Describe applications</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/regenerate/">Regenerate documentation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/integrate-output/">Integrate the output</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Input document</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#fields-consumed-by-the-renderer">Fields consumed by the renderer</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#references">References</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#names">Names</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../output/">Generated output</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../schema-support/">Payload diagrams</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/rendering/">How rendering works</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Terradue AsyncAPI Mate</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Input document</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/asyncapi-mate/edit/master/docs/reference/input.md">Edit on Terradue/asyncapi-mate</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="input-document-reference">Input document reference</h1>
+<p>AsyncAPI Mate loads YAML or JSON, requires a mapping at the document root, and resolves JSON references with <code>jsonref</code>. It does not run an AsyncAPI schema validator. The following expectations come from the bundled templates and renderer; they are not a complete AsyncAPI specification.</p>
+<h2 id="fields-consumed-by-the-renderer">Fields consumed by the renderer</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>asyncapi</code></td>
+<td>Specification version displayed in the Markdown page.</td>
+</tr>
+<tr>
+<td><code>info.title</code>, <code>info.version</code>, <code>info.description</code></td>
+<td>Page title and introduction.</td>
+</tr>
+<tr>
+<td><code>info.contact.name</code>, <code>info.contact.email</code></td>
+<td>Project team link.</td>
+</tr>
+<tr>
+<td><code>info.license.name</code>, <code>info.license.url</code>, <code>info.termsOfService</code></td>
+<td>Licensing and terms links.</td>
+</tr>
+<tr>
+<td><code>servers</code></td>
+<td>Mapping iterated by the Markdown template. Use <code>{}</code> when there are no servers to describe.</td>
+</tr>
+<tr>
+<td><code>servers.&lt;key&gt;</code></td>
+<td>Displays <code>title</code>, <code>summary</code>, <code>description</code>, <code>host</code>, <code>protocol</code>, <code>protocolVersion</code>, and <code>externalDocs.description</code> / <code>externalDocs.url</code>.</td>
+</tr>
+<tr>
+<td><code>defaultContentType</code></td>
+<td>Message format label.</td>
+</tr>
+<tr>
+<td><code>x-applications</code></td>
+<td>Mapping of application names to their descriptions and operations. Required by the CLI.</td>
+</tr>
+<tr>
+<td><code>x-applications.&lt;name&gt;.summary</code></td>
+<td>Application description in Markdown.</td>
+</tr>
+<tr>
+<td><code>x-applications.&lt;name&gt;.operations</code></td>
+<td>List of inline operations or references to operations.</td>
+</tr>
+<tr>
+<td><code>operation.action</code></td>
+<td><code>send</code> produces publisher arrows. Every other value follows the subscriber branch; use <code>receive</code> for receiving operations.</td>
+</tr>
+<tr>
+<td><code>operation.channel.address</code></td>
+<td>Queue label and normalized diagram identifier.</td>
+</tr>
+<tr>
+<td><code>operation.channel.parameters</code></td>
+<td>Optional parameter descriptions and enum values.</td>
+</tr>
+<tr>
+<td><code>operation.channel.messages.defaultMessage</code></td>
+<td>The specific message entry selected by the templates and CLI. Other message keys are not iterated.</td>
+</tr>
+<tr>
+<td><code>defaultMessage.name</code></td>
+<td>Message label and payload diagram filename.</td>
+</tr>
+<tr>
+<td><code>defaultMessage.payload</code></td>
+<td>Schema mapping passed to the payload diagram converter.</td>
+</tr>
+<tr>
+<td><code>defaultMessage.examples</code></td>
+<td>Examples with <code>name</code> and <code>payload</code>. Use <code>[]</code> for no examples.</td>
+</tr>
+</tbody>
+</table>
+<p>Missing descriptive values can render as empty text; missing nested objects or mappings can fail rendering. Start with the <a href="../../examples/orders.yaml">complete example</a> to supply the structure used by the templates.</p>
+<h2 id="references">References</h2>
+<p>The example uses local fragment references such as <code>#/operations/publishOrder</code> and <code>#/channels/orders</code>. Reference proxies retain reference metadata used by the operation-anchor filter. Inline operations have no reference-derived anchor.</p>
+<p>Remote references invoke an HTTP loader with a 30-second request timeout and HTTP status checking. Resolving references can therefore require network access. The implementation passes the source path directly as the reference base; relative external file references are not a documented portable workflow. Prefer a single document with local fragment references for the workflow shown here.</p>
+<h2 id="names">Names</h2>
+<p>Use simple, distinct application keys and message names suitable for filenames. Their original values are used in output paths. Avoid path separators and collisions between application names and message names.</p>
+<p>PlantUML identifiers replace spaces, hyphens, slashes, dots, and colons with underscores, and remove braces and square brackets. Distinct names can consequently produce the same diagram identifier. For example, <code>orders.created</code> and <code>orders-created</code> both become <code>orders_created</code>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../cli/" class="btn btn-neutral float-left" title="CLI"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../output/" class="btn btn-neutral float-right" title="Generated output">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p><a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%20License%202.0-blue"" alt="Apache License, Version 2.0" /></a></p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/asyncapi-mate/" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/asyncapi-mate</a>
+        </span>
+    
+    
+      <span><a href="../../cli/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../output/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

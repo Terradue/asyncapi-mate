@@ -1,0 +1,62 @@
+asyncapi: 3.0.0
+info:
+  title: Order events
+  version: 1.0.0
+  description: An order service publishes events for a billing service.
+  contact:
+    name: Example team
+    email: team@example.org
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  termsOfService: https://example.org/terms
+defaultContentType: application/json
+servers:
+  broker:
+    title: Event broker
+    summary: Development broker
+    description: Carries order events between the two services.
+    host: localhost:9092
+    protocol: kafka
+    protocolVersion: '3.0'
+    externalDocs:
+      description: Broker documentation
+      url: https://kafka.apache.org/documentation/
+channels:
+  orders:
+    address: orders.created
+    messages:
+      defaultMessage:
+        name: OrderCreated
+        payload:
+          title: OrderCreated
+          type: object
+          required: [orderId]
+          properties:
+            orderId:
+              type: string
+            total:
+              type: number
+        examples:
+          - name: NewOrder
+            payload:
+              orderId: order-001
+              total: 42.5
+operations:
+  publishOrder:
+    action: send
+    channel:
+      $ref: '#/channels/orders'
+  consumeOrder:
+    action: receive
+    channel:
+      $ref: '#/channels/orders'
+x-applications:
+  order-service:
+    summary: Publishes newly created orders.
+    operations:
+      - $ref: '#/operations/publishOrder'
+  billing-service:
+    summary: Receives orders for billing.
+    operations:
+      - $ref: '#/operations/consumeOrder'

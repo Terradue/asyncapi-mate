@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://Terradue.github.io/asyncapi-mate/reference/output/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Generated output - Terradue AsyncAPI Mate</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Generated output";
+        var mkdocs_page_input_path = "reference/output.md";
+        var mkdocs_page_url = "/asyncapi-mate/reference/output/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Terradue AsyncAPI Mate
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-pipeline/">Your first pipeline</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/describe-applications/">Describe applications</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/regenerate/">Regenerate documentation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/integrate-output/">Integrate the output</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../input/">Input document</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Generated output</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#image-paths">Image paths</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#diagram-hyperlinks">Diagram hyperlinks</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#template-selection">Template selection</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../schema-support/">Payload diagrams</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/rendering/">How rendering works</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Terradue AsyncAPI Mate</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Generated output</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/asyncapi-mate/edit/master/docs/reference/output.md">Edit on Terradue/asyncapi-mate</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="output-reference">Output reference</h1>
+<p>All paths below are relative to the directory supplied with <code>--output</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Content</th>
+<th>Existing file behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>asyncapi.md</code></td>
+<td>Main Markdown page with metadata, servers, applications, operations, and examples.</td>
+<td>Overwritten.</td>
+</tr>
+<tr>
+<td><code>asyncapi.puml</code></td>
+<td>Pipeline overview source.</td>
+<td>Overwritten.</td>
+</tr>
+<tr>
+<td><code>docs/diagrams/src/c4/components/EDA/&lt;application&gt;.puml</code></td>
+<td>One application's operations and channel examples.</td>
+<td>Overwritten.</td>
+</tr>
+<tr>
+<td><code>docs/diagrams/src/c4/components/EDA/&lt;message&gt;.puml</code></td>
+<td>Payload class diagram, named by <code>defaultMessage.name</code>.</td>
+<td>Skipped if the target already exists.</td>
+</tr>
+</tbody>
+</table>
+<p>The application filename comes from the key in <code>x-applications</code>. The message filename comes from each operation's default message. If multiple operations share a message name, the first written diagram wins. Existing payload files are skipped on later runs even when the schema changes. Files for removed applications or messages are not deleted.</p>
+<p>Application and payload files share a directory. A collision between their names can overwrite or suppress a diagram; choose distinct names.</p>
+<h2 id="image-paths">Image paths</h2>
+<p>No SVG files are generated by AsyncAPI Mate. The Markdown template contains relative links such as:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1">../../../diagrams/out/c4/components/EDA/asyncapi.svg
+</span><span id="__span-0-2">../../../diagrams/out/c4/components/EDA/&lt;application&gt;.svg
+</span><span id="__span-0-3">../../../diagrams/out/c4/components/EDA/&lt;message&gt;.svg
+</span></code></pre></div>
+<p>Those links assume the page will live at <code>docs/c4/components/EDA/asyncapi.md</code>. The CLI currently writes it at the output root, so placing the page and rendered diagrams in a site requires an integration step. See <a href="../../how-to/integrate-output/">Integrate the output</a>.</p>
+<h2 id="diagram-hyperlinks">Diagram hyperlinks</h2>
+<p>Pipeline and application diagram links currently target <code>asyncapi_events.html</code> with operation anchors. That filename differs from the generated <code>asyncapi.md</code>, and the Markdown headings do not explicitly define the reference-derived anchors. These hyperlinks are not guaranteed to resolve, even after arranging the image files. Correct the links and anchors in your publishing process if clickable operations are required.</p>
+<h2 id="template-selection">Template selection</h2>
+<p>The command uses bundled Jinja templates for Markdown, the pipeline overview, applications, and payload schemas. It exposes no template override option. Markdown and PlantUML output preserve literal syntax rather than applying HTML escaping.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../input/" class="btn btn-neutral float-left" title="Input document"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../schema-support/" class="btn btn-neutral float-right" title="Payload diagrams">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p><a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%20License%202.0-blue"" alt="Apache License, Version 2.0" /></a></p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/asyncapi-mate/" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/asyncapi-mate</a>
+        </span>
+    
+    
+      <span><a href="../input/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../schema-support/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

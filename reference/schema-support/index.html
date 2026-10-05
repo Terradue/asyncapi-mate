@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Fabrice Brito, Simone Tripodi" /><link rel="canonical" href="https://Terradue.github.io/asyncapi-mate/reference/schema-support/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Payload diagrams - Terradue AsyncAPI Mate</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Payload diagrams";
+        var mkdocs_page_input_path = "reference/schema-support.md";
+        var mkdocs_page_url = "/asyncapi-mate/reference/schema-support/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Terradue AsyncAPI Mate
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/first-pipeline/">Your first pipeline</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">How-to guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/describe-applications/">Describe applications</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/regenerate/">Regenerate documentation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../how-to/integrate-output/">Integrate the output</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../../cli/">CLI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../input/">Input document</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../output/">Generated output</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Payload diagrams</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#limits">Limits</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Explanation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../explanation/rendering/">How rendering works</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Terradue AsyncAPI Mate</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Reference</li>
+      <li class="breadcrumb-item active">Payload diagrams</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/Terradue/asyncapi-mate/edit/master/docs/reference/schema-support.md">Edit on Terradue/asyncapi-mate</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="payload-diagram-reference">Payload diagram reference</h1>
+<p>The payload converter builds a display model from a schema mapping. This is a diagram projection, not a JSON Schema validator or a complete representation of every constraint.</p>
+<table>
+<thead>
+<tr>
+<th>Schema feature</th>
+<th>Diagram representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>Normalized class name; the root falls back to <code>Root</code>.</td>
+</tr>
+<tr>
+<td><code>properties</code></td>
+<td>Class attributes, including classes for inline object properties.</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td>Required attributes use <code>+</code>; other attributes use <code>#</code>.</td>
+</tr>
+<tr>
+<td>Scalar <code>type</code></td>
+<td><code>string</code>, <code>integer</code>, <code>number</code>, <code>boolean</code>, or <code>null</code>; unrecognized types fall back to <code>any</code>.</td>
+</tr>
+<tr>
+<td>String <code>pattern</code></td>
+<td>Displayed as <code>re.compile(...)</code>; the renderer does not execute the expression.</td>
+</tr>
+<tr>
+<td>String <code>enum</code></td>
+<td>Named enum and association.</td>
+</tr>
+<tr>
+<td><code>const</code></td>
+<td>Displayed alongside an attribute when its value is not null.</td>
+</tr>
+<tr>
+<td><code>$defs</code> / <code>definitions</code></td>
+<td>Reusable definitions rendered as classes; <code>$defs</code> takes precedence when present.</td>
+</tr>
+<tr>
+<td><code>$ref</code></td>
+<td>Named type and association when the reference remains in the schema passed to the converter.</td>
+</tr>
+<tr>
+<td><code>allOf</code></td>
+<td>Referenced parents produce inheritance; inline object fragments contribute properties and required fields.</td>
+</tr>
+<tr>
+<td><code>oneOf</code></td>
+<td><code>Union[...]</code> display type, with links to referenced objects, inline objects, and enums.</td>
+</tr>
+<tr>
+<td>Array <code>items</code></td>
+<td><code>List[...]</code>, with links for supported item types. Missing item schemas display as <code>List[Any]</code>.</td>
+</tr>
+<tr>
+<td><code>additionalProperties: true</code></td>
+<td><code>Mapping[str, Any]</code>.</td>
+</tr>
+<tr>
+<td>Schema-valued <code>additionalProperties</code></td>
+<td><code>Mapping[str, &lt;value type&gt;]</code>, with a value association when applicable.</td>
+</tr>
+<tr>
+<td><code>additionalProperties: false</code></td>
+<td>No additional-properties attribute.</td>
+</tr>
+</tbody>
+</table>
+<p>An object with only additional properties can appear directly as a mapping field. Objects with named properties can display a separate <code>additionalProperties</code> attribute. Collection associations use <code>1</code> and <code>0..*</code> multiplicities.</p>
+<h2 id="limits">Limits</h2>
+<p>Constraints such as numeric bounds, string length, and <code>anyOf</code> are not fully represented. The <code>+</code> and <code>#</code> symbols indicate requiredness by this project's convention, rather than language-level visibility.</p>
+<p>The CLI resolves document references before conversion. The converter's support for raw <code>$ref</code> relationships does not mean those references will always remain intact after loading; resolved schemas can instead appear as inline structures. Circular reference graphs are not covered by the documented workflow.</p>
+<p>For an overview of how these structures complement pipeline diagrams, read <a href="../../explanation/rendering/">How rendering works</a>.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../output/" class="btn btn-neutral float-left" title="Generated output"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../explanation/rendering/" class="btn btn-neutral float-right" title="How rendering works">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+      <p><a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%20License%202.0-blue"" alt="Apache License, Version 2.0" /></a></p>
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/Terradue/asyncapi-mate/" class="fa fa-code-fork" style="color: #fcfcfc"> Terradue/asyncapi-mate</a>
+        </span>
+    
+    
+      <span><a href="../output/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../explanation/rendering/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
