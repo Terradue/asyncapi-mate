@@ -12,21 +12,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import get_operation_anchor_link, to_puml_name, load_aysncapi
+"""Render Markdown documentation and PlantUML diagrams from AsyncAPI files."""
+
+from __future__ import annotations
+
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+import click
+from jinja2 import Environment, PackageLoader, select_autoescape
+from loguru import logger
+
+from . import get_operation_anchor_link, load_aysncapi, to_puml_name
 from .__about__ import __version__
 from .schema_to_plantuml import (
     plantuml_application_channel_definitions,
     plantuml_operation_channel_definitions,
     schema_to_plantuml_model,
 )
-from datetime import datetime
-from jinja2 import Environment, PackageLoader
-from loguru import logger
-from pathlib import Path
-from typing import Any, List, Mapping
 
-import click
-import time
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+
+def _render_template(
+    environment: Environment, template_name: str, target: Path, **context: object
+) -> None:
+    """Render a template to disk, creating its parent directories."""
+    template = environment.get_template(template_name)
+    target.parent.mkdir(exist_ok=True, parents=True)
+    target.write_text(template.render(**context), encoding="utf-8")
+    logger.success(f"Template {template_name} successfully rendered to {target.absolute()}")
+
+
+def _render_application(
+    environment: Environment, output: Path, name: str, application: Mapping[str, Any]
+) -> None:
+    """Write application and message diagrams, reusing existing message files."""
+    diagram_path = "docs/diagrams/src/c4/components/EDA"
+    _render_template(
+        environment,
+        f"{diagram_path}/application.puml.jinja",
+        output / diagram_path / f"{name}.puml",
+        application_name=name,
+        application=application,
+    )
+    for operation in application["operations"]:
+        message = operation["channel"]["messages"]["defaultMessage"]
+        target = output / diagram_path / f"{message['name']}.puml"
+        if target.exists():
+            logger.info(f"File {target.absolute()} already exists, skipping.")
+            continue
+        _render_template(
+            environment,
+            f"{diagram_path}/schema_to_plantuml.puml.jinja",
+            target,
+            model=schema_to_plantuml_model(message["payload"]),
+        )
+
+
+def _render_document(source: Path, output: Path, start_time: float) -> None:
+    """Load a document and write its documentation and application diagrams."""
+    data = load_aysncapi(source)
+    # Markdown and PlantUML require literal syntax; HTML/XML templates are escaped.
+    environment = Environment(
+        loader=PackageLoader(package_name="asyncapi_mate"),
+        autoescape=select_autoescape(),
+    )
+    environment.filters.update(
+        {
+            "to_puml_name": to_puml_name,
+            "get_operation_anchor_link": get_operation_anchor_link,
+            "plantuml_operation_channel_definitions": plantuml_operation_channel_definitions,
+            "plantuml_application_channel_definitions": plantuml_application_channel_definitions,
+        }
+    )
+    for template_name in (
+        "docs/c4/components/EDA/asyncapi.md.jinja",
+        "docs/diagrams/src/c4/components/EDA/asyncapi.puml.jinja",
+    ):
+        _render_template(
+            environment,
+            template_name,
+            output / Path(template_name).stem,
+            asyncapi=data,
+            version=__version__,
+            generation_time=datetime.fromtimestamp(start_time).isoformat(timespec="milliseconds"),
+        )
+    for name, application in data["x-applications"].items():
+        _render_application(environment, output, name, application)
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -37,140 +113,18 @@ import time
     required=True,
 )
 @click.option(
-    "--output",
-    type=click.Path(path_type=Path),
-    required=True,
-    help="Output directory path",
+    "--output", type=click.Path(path_type=Path), required=True, help="Output directory path"
 )
-def main(source: Path, output: Path):
-    """Entry point for the SEDA Markdown template development CLI."""
+def main(source: Path, output: Path) -> None:
+    """Render documentation and diagrams for SOURCE into OUTPUT."""
     start_time = time.time()
-
-    logger.info(
-        f"{source.absolute()} processing started at: {datetime.fromtimestamp(start_time).isoformat(timespec='milliseconds')}..."
-    )
+    logger.info(f"{source.absolute()} processing started")
     try:
-        data: Mapping[str, Any] = load_aysncapi(source)
-
-        logger.success(f"{source.absolute()} successfully parsed to a Pydantic model!")
-
-        logger.warning(data)
-
-        jinja_environment = Environment(
-            loader=PackageLoader(package_name="asyncapi_mate")
-        )
-
-        def _to_mapping(functions: List[Any]):
-            mapping: Mapping[str, Any] = {}
-
-            for function in functions:
-                name = function.__name__
-                mapping[name] = function
-
-            jinja_environment.filters.update(mapping)
-
-        _to_mapping(
-            [
-                to_puml_name,
-                get_operation_anchor_link,
-                plantuml_operation_channel_definitions,
-                plantuml_application_channel_definitions,
-            ]
-        )
-
-        for template_name in [
-            "docs/c4/components/EDA/asyncapi.md",
-            "docs/diagrams/src/c4/components/EDA/asyncapi.puml",
-        ]:
-            logger.info(f"Rendering template {template_name}...")
-            template = jinja_environment.get_template(template_name)
-            target = Path(output, template_name)
-            target.parent.mkdir(exist_ok=True, parents=True)
-
-            with target.open("w") as output_stream:
-                output_stream.write(
-                    template.render(
-                        asyncapi=data,
-                        version=__version__,
-                        generation_time=datetime.fromtimestamp(start_time).isoformat(
-                            timespec="milliseconds"
-                        ),
-                    )
-                )
-
-                logger.success(
-                    f"Template {template_name} successfully rendered to {target.absolute()}"
-                )
-
-        for application_name, application in data["x-applications"].items():
-            logger.info(f"Rendering template for application {application_name}...")
-            template = jinja_environment.get_template(
-                "docs/diagrams/src/c4/components/EDA/application.puml"
-            )
-            target = Path(
-                output, f"docs/diagrams/src/c4/components/EDA/{application_name}.puml"
-            )
-            target.parent.mkdir(exist_ok=True, parents=True)
-
-            with target.open("w") as output_stream:
-                output_stream.write(
-                    template.render(
-                        application_name=application_name, application=application
-                    )
-                )
-
-                logger.success(
-                    f"Template for application {application_name} successfully rendered to {target.absolute()}"
-                )
-
-            for operation in application["operations"]:
-                logger.info(
-                    f"[{application_name}] Rendering template for operation {operation['action']} {operation['channel']['address']}..."
-                )
-
-                target = Path(
-                    output,
-                    f"docs/diagrams/src/c4/components/EDA/{operation['channel']['messages']['defaultMessage']['name']}.puml",
-                )
-
-                if target.exists():
-                    logger.info(f"File {target.absolute()} already exist, skipping.")
-                    continue
-
-                schema = operation["channel"]["messages"]["defaultMessage"]["payload"]
-                schema_model = schema_to_plantuml_model(schema)
-
-                template = jinja_environment.get_template(
-                    "docs/diagrams/src/c4/components/EDA/schema_to_plantuml.puml"
-                )
-
-                with target.open("w") as output_stream:
-                    output_stream.write(template.render(model=schema_model))
-
-                    logger.success(
-                        f"[{application_name}] operation {operation['action']} {operation['channel']['address']} successfully rendered to {target.absolute()}!"
-                    )
-
-        logger.success(
-            "------------------------------------------------------------------------"
-        )
-        logger.success("SUCCESS")
-        logger.success(
-            "------------------------------------------------------------------------"
-        )
-    except Exception as e:
-        logger.error(
-            "------------------------------------------------------------------------"
-        )
-        logger.error("FAIL")
-        logger.error(e)
-        logger.error(
-            "------------------------------------------------------------------------"
-        )
-
-    end_time = time.time()
-
-    logger.info(f"Total time: {end_time - start_time:.4f} seconds")
-    logger.info(
-        f"Finished at: {datetime.fromtimestamp(end_time).isoformat(timespec='milliseconds')}"
-    )
+        _render_document(source, output, start_time)
+    except Exception as error:
+        # The CLI boundary reports failures with diagnostics and a nonzero exit status.
+        logger.exception("Documentation generation failed")
+        raise click.ClickException(str(error)) from error
+    finally:
+        logger.info(f"Total time: {time.time() - start_time:.4f} seconds")
+    logger.success("SUCCESS")

@@ -12,77 +12,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Build internal PlantUML diagram structures from JSON Schema and AsyncAPI data."""
+
 from __future__ import annotations
 
-from . import to_puml_name
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional, Set, Tuple
+from dataclasses import asdict, dataclass, field
+from typing import Any
 
-JsonDict = Dict[str, Any]
+from . import to_puml_name
+
+JsonDict = dict[str, Any]
 MISSING = object()
 
 
 def ref_name(ref: str) -> str:
+    """Return the normalized final segment of a reference."""
     return to_puml_name(ref.split("/")[-1])
 
 
 def schema_title(node: JsonDict, fallback: str) -> str:
+    """Return a normalized schema title or the supplied fallback."""
     return to_puml_name(node.get("title", fallback))
 
 
 def py_string_literal(value: str) -> str:
+    """Quote a string for display as a Python literal."""
     return repr(value)
 
 
 @dataclass
 class Attribute:
+    """A rendered class field and its display metadata."""
+
     name: str
     type: str
     required: bool = False
-    const: Optional[Any] = None
+    const: Any | None = None
 
 
 @dataclass
 class ClassDef:
+    """A class declaration in a PlantUML diagram."""
+
     name: str
-    attributes: List[Attribute] = field(default_factory=list)
-    additional_properties: List[Attribute] = field(default_factory=list)
+    attributes: list[Attribute] = field(default_factory=list)
+    additional_properties: list[Attribute] = field(default_factory=list)
 
 
 @dataclass
 class EnumDef:
+    """An enumeration declaration in a PlantUML diagram."""
+
     name: str
-    values: List[str]
+    values: list[str]
 
 
 @dataclass
 class LinkDef:
+    """An association between two diagram elements."""
+
     src: str
     dst: str
     label: str
-    mult_src: Optional[str] = None
-    mult_dst: Optional[str] = None
+    mult_src: str | None = None
+    mult_dst: str | None = None
 
 
 @dataclass
 class DiagramModel:
-    classes: List[ClassDef] = field(default_factory=list)
-    enums: List[EnumDef] = field(default_factory=list)
-    inheritances: List[Tuple[str, str]] = field(default_factory=list)  # (parent, child)
-    links: List[LinkDef] = field(default_factory=list)
+    """Classes, enumerations, and relationships for template rendering."""
+
+    classes: list[ClassDef] = field(default_factory=list)
+    enums: list[EnumDef] = field(default_factory=list)
+    inheritances: list[tuple[str, str]] = field(default_factory=list)  # (parent, child)
+    links: list[LinkDef] = field(default_factory=list)
 
 
 @dataclass
 class ChannelExampleDef:
+    """A named example displayed beside a diagram channel."""
+
     name: str
     payload: Any
 
 
 @dataclass
 class ChannelDef:
+    """A diagram channel and its deduplicated examples."""
+
     address: str
-    examples: List[ChannelExampleDef] = field(default_factory=list)
+    examples: list[ChannelExampleDef] = field(default_factory=list)
 
 
 def _read_member(node: Any, key: str, default: Any = MISSING) -> Any:
@@ -114,16 +134,16 @@ def _iter_application_operations(applications: Any) -> Iterable[Any]:
     )
 
     for application in application_values or []:
-        for operation in _read_member(application, "operations", []) or []:
-            yield operation
+        yield from _read_member(application, "operations", []) or []
 
 
 def plantuml_operation_channel_definitions(
     operations: Iterable[Any],
     send_only: bool = False,
-) -> List[ChannelDef]:
-    channels_by_key: Dict[str, ChannelDef] = {}
-    seen_examples_by_channel: Dict[str, Set[str]] = {}
+) -> list[ChannelDef]:
+    """Collect channels and named examples, optionally limiting them to send operations."""
+    channels_by_key: dict[str, ChannelDef] = {}
+    seen_examples_by_channel: dict[str, set[str]] = {}
 
     for operation in operations or []:
         if send_only and _read_member(operation, "action") != "send":
@@ -141,38 +161,46 @@ def plantuml_operation_channel_definitions(
         channel = channels_by_key[channel_key]
         seen_examples = seen_examples_by_channel[channel_key]
 
-        examples = _read_path(
-            operation,
-            "channel",
-            "messages",
-            "defaultMessage",
-            "examples",
-            default=[],
-        )
-        for example in examples or []:
-            name = _read_member(example, "name", None)
-            if name is None:
-                continue
-
-            example_name = to_puml_name(str(name))
-            if example_name in seen_examples:
-                continue
-
-            seen_examples.add(example_name)
-            channel.examples.append(
-                ChannelExampleDef(
-                    name=example_name,
-                    payload=_read_member(example, "payload", {}),
-                )
-            )
+        _append_channel_examples(channel, seen_examples, operation)
 
     return list(channels_by_key.values())
+
+
+def _append_channel_examples(
+    channel: ChannelDef, seen_examples: set[str], operation: object
+) -> None:
+    """Append named examples once per normalized name within a channel."""
+    examples = _read_path(
+        operation,
+        "channel",
+        "messages",
+        "defaultMessage",
+        "examples",
+        default=[],
+    )
+    for example in examples or []:
+        name = _read_member(example, "name", None)
+        if name is None:
+            continue
+
+        example_name = to_puml_name(str(name))
+        if example_name in seen_examples:
+            continue
+
+        seen_examples.add(example_name)
+        channel.examples.append(
+            ChannelExampleDef(
+                name=example_name,
+                payload=_read_member(example, "payload", {}),
+            )
+        )
 
 
 def plantuml_application_channel_definitions(
     applications: Any,
     send_only: bool = True,
-) -> List[ChannelDef]:
+) -> list[ChannelDef]:
+    """Collect channels and named examples, optionally limiting them to send operations."""
     return plantuml_operation_channel_definitions(
         _iter_application_operations(applications),
         send_only=send_only,
@@ -180,21 +208,22 @@ def plantuml_application_channel_definitions(
 
 
 class SchemaToPlantUMLModel:
-    def __init__(self, schema: JsonDict):
+    """Build diagram declarations and relationships from a JSON Schema."""
+
+    def __init__(self, schema: JsonDict) -> None:
         self.schema = schema
-        self.defs: JsonDict = schema.get("$defs", schema.get("definitions", {}))
+        self.defs: JsonDict = schema.get("$defs", schema.get("definitions", {})) or {}
 
         self.model = DiagramModel()
 
-        self._classes_by_name: Dict[str, ClassDef] = {}
-        self._enums_by_name: Dict[str, EnumDef] = {}
-        self._inheritance_seen: Set[Tuple[str, str]] = set()
-        self._links_seen: Set[Tuple[str, str, str, Optional[str], Optional[str]]] = (
-            set()
-        )
-        self._rendered: Set[str] = set()
+        self._classes_by_name: dict[str, ClassDef] = {}
+        self._enums_by_name: dict[str, EnumDef] = {}
+        self._inheritance_seen: set[tuple[str, str]] = set()
+        self._links_seen: set[tuple[str, str, str, str | None, str | None]] = set()
+        self._rendered: set[str] = set()
 
     def build(self) -> DiagramModel:
+        """Build the diagram, including reusable schema definitions."""
         root_name = schema_title(self.schema, "Root")
         self._render_object(root_name, self.schema)
 
@@ -210,7 +239,7 @@ class SchemaToPlantUMLModel:
             self._classes_by_name[name] = ClassDef(name=name)
         return self._classes_by_name[name]
 
-    def _ensure_enum(self, name: str, values: List[Any]) -> None:
+    def _ensure_enum(self, name: str, values: list[Any]) -> None:
         if name not in self._enums_by_name:
             self._enums_by_name[name] = EnumDef(
                 name=name,
@@ -228,8 +257,8 @@ class SchemaToPlantUMLModel:
         src: str,
         dst: str,
         label: str,
-        mult_src: Optional[str] = None,
-        mult_dst: Optional[str] = None,
+        mult_src: str | None = None,
+        mult_dst: str | None = None,
     ) -> None:
         edge = (src, dst, label, mult_src, mult_dst)
         if edge not in self._links_seen:
@@ -251,16 +280,23 @@ class SchemaToPlantUMLModel:
         return "string"
 
     def _scalar_type(self, node: JsonDict) -> str:
-        t = node.get("type")
-        if t == "string":
+        scalar_type = node.get("type")
+        if scalar_type == "string":
             return self._string_type(node)
-        if t in {"integer", "number", "boolean", "null", "object", "array"}:
-            return t
+        if isinstance(scalar_type, str) and scalar_type in {
+            "integer",
+            "number",
+            "boolean",
+            "null",
+            "object",
+            "array",
+        }:
+            return scalar_type
         if "$ref" in node:
             return ref_name(node["$ref"])
         return "any"
 
-    def _inline_object_fragments(self, node: JsonDict) -> List[JsonDict]:
+    def _inline_object_fragments(self, node: JsonDict) -> list[JsonDict]:
         fragments = [node]
 
         for parent in node.get("allOf", []):
@@ -269,16 +305,16 @@ class SchemaToPlantUMLModel:
 
         return fragments
 
-    def _flattened_properties(self, node: JsonDict) -> Dict[str, JsonDict]:
-        properties: Dict[str, JsonDict] = {}
+    def _flattened_properties(self, node: JsonDict) -> dict[str, JsonDict]:
+        properties: dict[str, JsonDict] = {}
 
         for fragment in self._inline_object_fragments(node):
             properties.update(fragment.get("properties", {}))
 
         return properties
 
-    def _flattened_required(self, node: JsonDict) -> Set[str]:
-        required: Set[str] = set()
+    def _flattened_required(self, node: JsonDict) -> set[str]:
+        required: set[str] = set()
 
         for fragment in self._inline_object_fragments(node):
             required.update(fragment.get("required", []))
@@ -300,7 +336,7 @@ class SchemaToPlantUMLModel:
     def _inline_object_name(self, node: JsonDict, fallback: str) -> str:
         return schema_title(node, fallback)
 
-    def _additional_properties_schema(self, node: JsonDict) -> Optional[Any]:
+    def _additional_properties_schema(self, node: JsonDict) -> Any | None:
         additional_properties: Any = MISSING
 
         for fragment in self._inline_object_fragments(node):
@@ -321,7 +357,7 @@ class SchemaToPlantUMLModel:
         owner_name: str,
         prop_name: str,
         node: JsonDict,
-    ) -> Optional[str]:
+    ) -> str | None:
         additional_properties = self._additional_properties_schema(node)
         if additional_properties is None:
             return None
@@ -329,9 +365,7 @@ class SchemaToPlantUMLModel:
         if additional_properties is True:
             return "Any"
 
-        value_type = self._field_type(
-            owner_name, f"{prop_name}_Value", additional_properties
-        )
+        value_type = self._field_type(owner_name, f"{prop_name}_Value", additional_properties)
         return "Any" if value_type == "any" else value_type
 
     def _is_pure_mapping_object(self, node: JsonDict) -> bool:
@@ -352,7 +386,7 @@ class SchemaToPlantUMLModel:
         owner_name: str,
         prop_name: str,
         node: JsonDict,
-    ) -> Optional[str]:
+    ) -> str | None:
         if not self._is_pure_mapping_object(node):
             return None
 
@@ -406,6 +440,10 @@ class SchemaToPlantUMLModel:
         if "$ref" in prop:
             return ref_name(prop["$ref"])
 
+        return self._container_field_type(owner_name, prop_name, prop)
+
+    def _container_field_type(self, owner_name: str, prop_name: str, prop: JsonDict) -> str:
+        """Resolve arrays, mappings, inline objects, and scalar field types."""
         if prop.get("type") == "array":
             items = prop.get("items")
             if items is None:
@@ -433,8 +471,8 @@ class SchemaToPlantUMLModel:
         label: str,
         member: JsonDict,
         fallback: str,
-        mult_src: Optional[str] = None,
-        mult_dst: Optional[str] = None,
+        mult_src: str | None = None,
+        mult_dst: str | None = None,
     ) -> None:
         mapping_type = self._mapping_type(owner_name, label, member)
         if mapping_type is not None:
@@ -450,34 +488,27 @@ class SchemaToPlantUMLModel:
                 )
             return
 
-        if member.get("enum") and member.get("type") == "string":
-            enum_name = to_puml_name(f"{fallback}_Enum")
-            self._ensure_enum(enum_name, member["enum"])
-            self._add_link(owner_name, enum_name, label, mult_src, mult_dst)
+        if "$ref" in member or (member.get("enum") and member.get("type") == "string"):
+            self._render_direct_link(owner_name, label, member, fallback, mult_src, mult_dst)
             return
 
-        if "$ref" in member:
-            self._add_link(
-                owner_name, ref_name(member["$ref"]), label, mult_src, mult_dst
-            )
-            return
+        self._render_container_links(owner_name, label, member, fallback, mult_src, mult_dst)
 
+    def _render_container_links(
+        self,
+        owner_name: str,
+        label: str,
+        member: JsonDict,
+        fallback: str,
+        mult_src: str | None,
+        mult_dst: str | None,
+    ) -> None:
+        """Render union and array relationships with their display multiplicities."""
         if "oneOf" in member:
-            for i, option in enumerate(member["oneOf"], start=1):
-                if "$ref" in option:
-                    self._add_link(
-                        owner_name, ref_name(option["$ref"]), label, mult_src, mult_dst
-                    )
-                elif option.get("enum") and option.get("type") == "string":
-                    enum_name = to_puml_name(f"{fallback}_Option{i}_Enum")
-                    self._ensure_enum(enum_name, option["enum"])
-                    self._add_link(owner_name, enum_name, label, mult_src, mult_dst)
-                elif self._is_object_like(option):
-                    target_name = self._inline_object_name(
-                        option, f"{fallback}_Option{i}"
-                    )
-                    self._render_object(target_name, option)
-                    self._add_link(owner_name, target_name, label, mult_src, mult_dst)
+            for index, option in enumerate(member["oneOf"], start=1):
+                self._render_direct_link(
+                    owner_name, label, option, f"{fallback}_Option{index}", mult_src, mult_dst
+                )
             return
 
         if member.get("type") == "array":
@@ -491,6 +522,28 @@ class SchemaToPlantUMLModel:
                     mult_src or "1",
                     mult_dst or "0..*",
                 )
+            return
+
+        self._render_direct_link(owner_name, label, member, fallback, mult_src, mult_dst)
+
+    def _render_direct_link(
+        self,
+        owner_name: str,
+        label: str,
+        member: JsonDict,
+        fallback: str,
+        mult_src: str | None,
+        mult_dst: str | None,
+    ) -> None:
+        """Connect a field to its referenced class, inline class, or enum."""
+        if member.get("enum") and member.get("type") == "string":
+            enum_name = to_puml_name(f"{fallback}_Enum")
+            self._ensure_enum(enum_name, member["enum"])
+            self._add_link(owner_name, enum_name, label, mult_src, mult_dst)
+            return
+
+        if "$ref" in member:
+            self._add_link(owner_name, ref_name(member["$ref"]), label, mult_src, mult_dst)
             return
 
         if self._is_object_like(member):
@@ -518,9 +571,7 @@ class SchemaToPlantUMLModel:
         if additional_properties is not None:
             value_type = "Any"
             if isinstance(additional_properties, dict):
-                value_type = self._field_type(
-                    name, "additionalProperties", additional_properties
-                )
+                value_type = self._field_type(name, "additionalProperties", additional_properties)
                 if value_type == "any":
                     value_type = "Any"
 
@@ -560,6 +611,7 @@ class SchemaToPlantUMLModel:
 
 
 def schema_to_plantuml_model(schema: JsonDict) -> JsonDict:
+    """Return the diagram as a mapping suitable for Jinja templates."""
     builder = SchemaToPlantUMLModel(schema)
     model = builder.build()
     return asdict(model)

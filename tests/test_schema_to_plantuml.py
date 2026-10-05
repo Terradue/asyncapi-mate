@@ -10,39 +10,33 @@ from asyncapi_mate.schema_to_plantuml import (
 )
 
 
-def _render_schema_diagram(model):
-    templates_dir = (
-        Path(__file__).resolve().parents[1] / "src" / "asyncapi_mate" / "templates"
-    )
+def _render_schema_diagram(model: object) -> str:
+    templates_dir = Path(__file__).resolve().parents[1] / "src" / "asyncapi_mate" / "templates"
     environment = Environment(loader=FileSystemLoader(templates_dir))
     template = environment.get_template(
-        "docs/diagrams/src/c4/components/EDA/schema_to_plantuml.puml"
+        "docs/diagrams/src/c4/components/EDA/schema_to_plantuml.puml.jinja"
     )
     return template.render(model=model)
 
 
-def _render_eda_diagram(template_name, **context):
-    templates_dir = (
-        Path(__file__).resolve().parents[1] / "src" / "asyncapi_mate" / "templates"
-    )
+def _render_eda_diagram(template_name: str, **context: object) -> str:
+    templates_dir = Path(__file__).resolve().parents[1] / "src" / "asyncapi_mate" / "templates"
     environment = Environment(loader=FileSystemLoader(templates_dir))
     environment.filters.update(
         {
             "to_puml_name": to_puml_name,
             "get_operation_anchor_link": lambda operation: "operation-anchor",
-            "plantuml_operation_channel_definitions": (
-                plantuml_operation_channel_definitions
-            ),
-            "plantuml_application_channel_definitions": (
-                plantuml_application_channel_definitions
-            ),
+            "plantuml_operation_channel_definitions": (plantuml_operation_channel_definitions),
+            "plantuml_application_channel_definitions": (plantuml_application_channel_definitions),
         }
     )
     template = environment.get_template(template_name)
     return template.render(**context)
 
 
-def _operation(action, address, message_name, examples):
+def _operation(
+    action: str, address: str, message_name: str, examples: list[dict[str, object]]
+) -> dict[str, object]:
     return {
         "action": action,
         "channel": {
@@ -57,11 +51,11 @@ def _operation(action, address, message_name, examples):
     }
 
 
-def _example(name, payload):
+def _example(name: str, payload: object) -> dict[str, object]:
     return {"name": name, "payload": payload}
 
 
-def test_plantuml_application_channel_definitions_deduplicate_writer_topics():
+def test_plantuml_application_channel_definitions_deduplicate_writer_topics() -> None:
     applications = {
         "writer-a": {
             "operations": [
@@ -108,7 +102,7 @@ def test_plantuml_application_channel_definitions_deduplicate_writer_topics():
     ]
 
 
-def test_asyncapi_template_serializes_shared_writer_topic_once():
+def test_asyncapi_template_serializes_shared_writer_topic_once() -> None:
     asyncapi = {
         "x-applications": {
             "writer-a": {
@@ -138,7 +132,7 @@ def test_asyncapi_template_serializes_shared_writer_topic_once():
     }
 
     rendered = _render_eda_diagram(
-        "docs/diagrams/src/c4/components/EDA/asyncapi.puml",
+        "docs/diagrams/src/c4/components/EDA/asyncapi.puml.jinja",
         asyncapi=asyncapi,
     )
 
@@ -149,7 +143,7 @@ def test_asyncapi_template_serializes_shared_writer_topic_once():
     assert "writer_b -d-> events_orders_created" in rendered
 
 
-def test_application_template_serializes_repeated_operation_topic_once():
+def test_application_template_serializes_repeated_operation_topic_once() -> None:
     application = {
         "operations": [
             _operation(
@@ -168,7 +162,7 @@ def test_application_template_serializes_repeated_operation_topic_once():
     }
 
     rendered = _render_eda_diagram(
-        "docs/diagrams/src/c4/components/EDA/application.puml",
+        "docs/diagrams/src/c4/components/EDA/application.puml.jinja",
         application_name="worker",
         application=application,
     )
@@ -179,7 +173,7 @@ def test_application_template_serializes_repeated_operation_topic_once():
     assert "worker -U-> events_orders_created" in rendered
 
 
-def test_schema_to_plantuml_model_tracks_typed_additional_properties():
+def test_schema_to_plantuml_model_tracks_typed_additional_properties() -> None:
     schema = {
         "title": "Metadata",
         "type": "object",
@@ -216,7 +210,7 @@ def test_schema_to_plantuml_model_tracks_typed_additional_properties():
     } in model["links"]
 
 
-def test_schema_to_plantuml_template_renders_typed_additional_properties():
+def test_schema_to_plantuml_template_renders_typed_additional_properties() -> None:
     schema = {
         "title": "Metadata",
         "type": "object",
@@ -238,7 +232,7 @@ def test_schema_to_plantuml_template_renders_typed_additional_properties():
     assert 'Metadata "1" --> "0..*" AttributeValue : additionalProperties' in rendered
 
 
-def test_schema_to_plantuml_model_tracks_untyped_additional_properties():
+def test_schema_to_plantuml_model_tracks_untyped_additional_properties() -> None:
     schema = {
         "title": "Metadata",
         "type": "object",
@@ -261,7 +255,7 @@ def test_schema_to_plantuml_model_tracks_untyped_additional_properties():
     assert model["links"] == []
 
 
-def test_schema_to_plantuml_template_renders_untyped_additional_properties():
+def test_schema_to_plantuml_template_renders_untyped_additional_properties() -> None:
     schema = {
         "title": "Metadata",
         "type": "object",
@@ -275,7 +269,7 @@ def test_schema_to_plantuml_template_renders_untyped_additional_properties():
     assert "Mapping_str_Any" not in rendered
 
 
-def test_schema_to_plantuml_flattens_inline_allof_and_map_properties():
+def test_schema_to_plantuml_flattens_inline_allof_and_map_properties() -> None:
     schema = {
         "title": "Event",
         "type": "object",
@@ -345,7 +339,7 @@ def test_schema_to_plantuml_flattens_inline_allof_and_map_properties():
     } in model["links"]
 
 
-def test_schema_to_plantuml_template_avoids_synthetic_allof_map_classes():
+def test_schema_to_plantuml_template_avoids_synthetic_allof_map_classes() -> None:
     schema = {
         "title": "Event",
         "type": "object",
@@ -401,7 +395,7 @@ def test_schema_to_plantuml_template_avoids_synthetic_allof_map_classes():
     assert 'PipedData "1" --> "0..*" GeoJSON_FeatureCollection : entries' in rendered
 
 
-def test_schema_to_plantuml_detects_array_item_types():
+def test_schema_to_plantuml_detects_array_item_types() -> None:
     schema = {
         "title": "Batch",
         "type": "object",
@@ -426,9 +420,7 @@ def test_schema_to_plantuml_detects_array_item_types():
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/$defs/GeoJSON_FeatureCollection"
-                    },
+                    "additionalProperties": {"$ref": "#/$defs/GeoJSON_FeatureCollection"},
                 },
             },
         },
@@ -447,15 +439,11 @@ def test_schema_to_plantuml_detects_array_item_types():
 
     model = schema_to_plantuml_model(schema)
     classes = {cls["name"]: cls for cls in model["classes"]}
-    batch_attributes = {
-        attr["name"]: attr["type"] for attr in classes["Batch"]["attributes"]
-    }
+    batch_attributes = {attr["name"]: attr["type"] for attr in classes["Batch"]["attributes"]}
 
     assert batch_attributes["events"] == "List[Batch_events_Item]"
     assert batch_attributes["states"] == "List[Batch_states_Item_Enum]"
-    assert (
-        batch_attributes["by_name"] == "List[Mapping[str, GeoJSON_FeatureCollection]]"
-    )
+    assert batch_attributes["by_name"] == "List[Mapping[str, GeoJSON_FeatureCollection]]"
     assert "Batch_events_Item" in classes
     assert {
         "src": "Batch",
@@ -480,7 +468,7 @@ def test_schema_to_plantuml_detects_array_item_types():
     } in model["links"]
 
 
-def test_schema_to_plantuml_template_renders_array_item_types():
+def test_schema_to_plantuml_template_renders_array_item_types() -> None:
     schema = {
         "title": "Batch",
         "type": "object",
@@ -505,9 +493,7 @@ def test_schema_to_plantuml_template_renders_array_item_types():
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/$defs/GeoJSON_FeatureCollection"
-                    },
+                    "additionalProperties": {"$ref": "#/$defs/GeoJSON_FeatureCollection"},
                 },
             },
         },
